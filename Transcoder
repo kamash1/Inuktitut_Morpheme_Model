@@ -1,0 +1,144 @@
+import sys
+
+def readlines(infile):
+    with open(infile, mode='r', encoding='utf-8') as file:
+        return file.readlines()
+
+def writelines(outfile, lines):
+    with open(outfile, mode='w', encoding='utf-8') as file:
+        file.writelines(lines)
+
+def main(infile, outfile):
+    transcode_dict = {'ᐃ': 'i',
+                      'ᐄ': 'ii',
+                      'ᐅ': 'u',
+                      'ᐆ': 'uu',
+                      'ᐊ': 'a',
+                      'ᐋ': 'aa',
+                      'ᐱ': 'pi',
+                      'ᐲ': 'pii',
+                      'ᐳ': 'pu',
+                      'ᐴ': 'puu',
+                      'ᐸ': 'pa',
+                      'ᐹ': 'paa',
+                      'ᑉ': 'p',
+                      'ᑎ': 'ti',
+                      'ᑏ': 'tii',
+                      'ᑐ': 'tu',
+                      'ᑑ': 'tuu',
+                      'ᑕ': 'ta',
+                      'ᑖ': 'taa',
+                      'ᑦ': 't',
+                      'ᑭ': 'ki',
+                      'ᑮ': 'kii',
+                      'ᑯ': 'ku',
+                      'ᑰ': 'kuu',
+                      'ᑲ': 'ka',
+                      'ᑳ': 'kaa',
+                      'ᒃ': 'k',
+                      'ᒋ': 'gi',
+                      'ᒌ': 'gii',
+                      'ᒍ': 'gu',
+                      'ᒎ': 'guu',
+                      'ᒐ': 'ga',
+                      'ᒑ': 'gaa',
+                      'ᒡ': 'g',
+                      'ᒥ': 'mi',
+                      'ᒦ': 'mii',
+                      'ᒧ': 'mu',
+                      'ᒨ': 'muu',
+                      'ᒪ': 'ma',
+                      'ᒫ': 'maa',
+                      'ᒻ': 'm',
+                      'ᓂ': 'ni',
+                      'ᓃ': 'nii',
+                      'ᓄ': 'nu',
+                      'ᓅ': 'nuu',
+                      'ᓇ': 'na',
+                      'ᓈ': 'naa',
+                      'ᓐ': 'n',
+                      'ᓯ': 'si',
+                      'ᓰ': 'sii',
+                      'ᓱ': 'su',
+                      'ᓲ': 'suu',
+                      'ᓴ': 'sa',
+                      'ᓵ': 'saa',
+                      'ᔅ': 's',
+                      'ᓕ': 'li',
+                      'ᓖ': 'lii',
+                      'ᓗ': 'lu',
+                      'ᓘ': 'luu',
+                      'ᓚ': 'la',
+                      'ᓛ': 'laa',
+                      'ᓪ': 'l',
+                      'ᔨ': 'ji',
+                      'ᔩ': 'jii',
+                      'ᔪ': 'ju',
+                      'ᔫ': 'juu',
+                      'ᔭ': 'ja',
+                      'ᔮ': 'jaa',
+                      'ᔾ': 'j',
+                      'ᕕ': 'vi',
+                      'ᕖ': 'vii',
+                      'ᕗ': 'vu',
+                      'ᕘ': 'vuu',
+                      'ᕙ': 'va',
+                      'ᕚ': 'vaa',
+                      'ᕝ': 'v',
+                      'ᕆ': 'ri',
+                      'ᕇ': 'rii',
+                      'ᕈ': 'ru',
+                      'ᕉ': 'ruu',
+                      'ᕋ': 'ra',
+                      'ᕌ': 'raa',
+                      'ᕐ': 'r',
+                      'ᕿ': 'qi',
+                      'ᖀ': 'qii',
+                      'ᖁ': 'qu',
+                      'ᖂ': 'quu',
+                      'ᖃ': 'qa',
+                      'ᖄ': 'qaa',
+                      'ᖅ': 'q',
+                      'ᖏ': 'ngi',
+                      'ᖐ': 'ngii',
+                      'ᖑ': 'ngu',
+                      'ᖒ': 'nguu',
+                      'ᖓ': 'nga',
+                      'ᖔ': 'ngaa',
+                      'ᖕ': 'ng',
+                      'ᙱ': 'nngi',
+                      'ᙲ': 'nngii',
+                      'ᙳ': 'nngu',
+                      'ᙴ': 'nnguu',
+                      'ᙵ': 'nnga',
+                      'ᙶ': 'nngaa',
+                      'ᖖ': 'nng',
+                      'ᖠ': '&i',
+                      'ᖡ': '&ii',
+                      'ᖢ': '&u',
+                      'ᖣ': '&uu',
+                      'ᖤ': '&a',
+                      'ᖥ': '&aa',
+                      'ᖦ': '&'}
+    irregulars = {'ᑭ': 'qi',
+                 'ᑮ': 'qii',
+                  'ᑯ': 'qu',
+                  'ᑰ': 'quu',
+                  'ᑲ': 'qa',
+                  'ᑳ': 'qaa'}
+    lines = readlines(infile)
+    new_lines = []
+    for line in lines:
+        new_line = ''
+        prev_c = ''
+        for c in line:
+            new_c = transcode_dict.get(c, f" {c} ")
+            if prev_c == 'ᖅ' and c in irregulars:
+                new_c = irregulars.get(c)
+            new_line += new_c
+            prev_c = c
+        new_lines.append(new_line)
+    writelines(outfile, new_lines)
+
+if __name__ == '__main__':
+    main(sys.argv[1], sys.argv[2])
