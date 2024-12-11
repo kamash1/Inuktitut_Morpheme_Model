@@ -1,0 +1,47 @@
+import subprocess, sys, re
+from concurrent.futures import ThreadPoolExecutor
+
+
+def readlines(infile):
+    with open(infile, mode='r', encoding='utf-8') as file:
+        return file.readlines()
+
+def writelines(outfile, lines):
+    with open(outfile, mode='w', encoding='utf-8') as file:
+        for line in lines:
+            file.writelines(line + '\n')
+
+def parse_word(word):
+    path = './Uqailaut.jar'
+    new_word = ''
+    if word.isalpha() or '&' in word:
+        morphemes = subprocess.run(['java', '-jar', path, word],
+                                   capture_output=True)
+        if morphemes.stdout:
+            morphemes = morphemes.stdout
+            morphemes = morphemes.split()
+            morphemes = str(morphemes[-1])
+            matches = re.findall(r':.+?(?:\/)', morphemes)
+            clean_matches = []
+            for match in matches:
+                clean_match = match.strip(':/')
+                clean_matches.append(clean_match)
+            for match in clean_matches:
+                new_word += f" {match} "
+    if not new_word:
+        new_word = word
+    return new_word
+
+def main(infile, outfile):
+    lines = readlines(infile)
+    new_lines = []
+    with ThreadPoolExecutor(max_workers=16) as executor:
+        for line in lines:
+            words = line.split()
+            parsed_words = list(executor.map(parse_word, words))
+            new_lines.append(' '.join(parsed_words))
+    writelines(outfile, new_lines)
+
+
+if __name__ == '__main__':
+    main(sys.argv[1], sys.argv[2])
